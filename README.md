@@ -2,6 +2,7 @@ AMM LP Simulation Dashboard
 
 A quantitative research tool for modeling AMM liquidity provider performance under stochastic price dynamics.
 Built with Python, Streamlit, NumPy, and Matplotlib.
+Streamlit: https://amm-lp-simulation-dashboard-gzdftxeqlbiqxtuzbpc3eh.streamlit.app/
 
 🚀 Overview
 
