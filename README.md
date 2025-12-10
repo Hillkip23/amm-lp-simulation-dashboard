@@ -250,12 +250,13 @@ ACF of returns and squared returns
 
 Detects volatility clustering
 
-✔ LP Simulation Modules
-Model	Supported
-Uniswap v2 (constant fees)	✅
-Uniswap v2 (dynamic fees)	✅
-Uniswap v3 (concentrated liquidity)	✅
-Arbitrary price paths (user-defined)	🟡 optional
+| Model                                | Supported   |
+| ------------------------------------ | ----------- |
+| Uniswap v2 (constant fees)           | ✅          |
+| Uniswap v2 (dynamic fees)            | ✅          |
+| Uniswap v3 (concentrated liquidity)  | ✅          |
+| Arbitrary price paths (user-defined) | 🟡 optional |
+
 
 Outputs include:
 
@@ -271,7 +272,7 @@ Fee income
 
 Return decomposition
 
-✔ Uniswap v3 Optimal Range Search
+Uniswap v3 Optimal Range Search
 
 Grid search over:
 
@@ -282,3 +283,5 @@ Upper bound range
 Grid resolution
 
 Returns top-performing ranges by mean LP/HODL.
+
+
