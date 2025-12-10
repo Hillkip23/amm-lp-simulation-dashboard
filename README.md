@@ -1,3 +1,22 @@
+<p align="center">
+
+  <!-- Project Title -->
+  <h1 align="center">AMM LP Simulation Dashboard</h1>
+  <h4 align="center">Quantitative AMM Risk Modeling • Uniswap v2/v3 • LP Performance Simulation</h4>
+
+  <!-- Live App Badge -->
+  <a href="https://amm-lp-simulation-dashboard-gzdftxeqlbiqxtuzbpc3eh.streamlit.app/">
+    <img src="https://img.shields.io/badge/Launch_App-Streamlit-FF4B4B?logo=streamlit&logoColor=white" alt="Launch Streamlit App" />
+  </a>
+
+  <!-- GitHub Badges -->
+  <br/>
+  <img src="https://img.shields.io/github/languages/top/Hillkip23/amm-lp-simulation-dashboard?color=blue" alt="Top Language" />
+  <img src="https://img.shields.io/github/repo-size/Hillkip23/amm-lp-simulation-dashboard?color=informational" alt="Repo Size" />
+  <img src="https://img.shields.io/badge/Python-3.10+-yellow?logo=python" alt="Python Version" />
+  <img src="https://img.shields.io/badge/Streamlit-1.x-FF4B4B
+
+
 AMM LP Simulation Dashboard
 
 A quantitative research tool for modeling AMM liquidity provider performance under stochastic price dynamics.
