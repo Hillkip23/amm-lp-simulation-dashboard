@@ -592,3 +592,162 @@ if prices_series is not None and not prices_series.empty:
         st.experimental_rerun()
 else:
     st.info("Select an asset and/or upload a CSV to run calibration.")
+
+
+import matplotlib.pyplot as plt
+import numpy as np
+import pandas as pd
+import streamlit as st
+
+from src.stablecoin import (
+    simulate_mean_reverting_peg,
+    slippage_curve,
+    constant_product_slippage,
+)
+
+# ... your existing code above ...
+
+
+st.header("🪙 Stablecoin Peg & Liquidity Stress Lab")
+
+st.markdown(
+    """
+This module explores **stablecoin peg behavior** and **liquidity resilience** under
+different levels of volatility, mean reversion, and pool depth.
+
+Use it to answer:
+
+- How tightly does a stablecoin trade around $1 under shocks?
+- How much liquidity is needed to keep the peg within 1–2%?
+- How quickly does slippage explode as trade size increases?
+"""
+)
+
+col_left, col_right = st.columns(2)
+
+with col_left:
+    st.subheader("Peg Dynamics Parameters")
+    n_paths_peg = st.slider("Number of paths", 50, 2000, 500)
+    n_steps_peg = st.slider("Steps per path (peg)", 50, 365, 252)
+    T_peg = st.slider("Horizon (years)", 0.1, 2.0, 1.0)
+    kappa = st.slider("Mean reversion speed (κ)", 0.1, 5.0, 2.0)
+    sigma_peg = st.slider("Peg volatility (σ)", 0.001, 0.1, 0.02)
+    p0_peg = st.slider("Initial price", 0.90, 1.10, 1.00)
+
+with col_right:
+    st.subheader("Pool & Stress Parameters")
+    reserve_stable = st.number_input("Stablecoin reserve in pool", 100_000.0, 100_000_000.0, 1_000_000.0, step=50_000.0)
+    reserve_collateral = st.number_input("Collateral reserve in pool", 100_000.0, 100_000_000.0, 1_000_000.0, step=50_000.0)
+    fee_bps = st.slider("AMM fee (bps)", 0, 100, 4)
+    max_trade_pct = st.slider("Max trade size as % of stable reserve", 0.05, 1.0, 0.5)
+    stress_scenario = st.selectbox(
+        "Stress scenario",
+        ["Normal", "Volatility shock (σ × 3)", "Liquidity shock (-50% depth)", "Vol + Liquidity shock"],
+    )
+
+run_peg = st.button("Run Stablecoin Peg Simulation")
+
+if run_peg:
+    # Apply stress
+    sigma_eff = sigma_peg
+    reserve_stable_eff = reserve_stable
+    reserve_collateral_eff = reserve_collateral
+
+    if stress_scenario == "Volatility shock (σ × 3)":
+        sigma_eff = sigma_peg * 3.0
+    elif stress_scenario == "Liquidity shock (-50% depth)":
+        reserve_stable_eff = reserve_stable * 0.5
+        reserve_collateral_eff = reserve_collateral * 0.5
+    elif stress_scenario == "Vol + Liquidity shock":
+        sigma_eff = sigma_peg * 3.0
+        reserve_stable_eff = reserve_stable * 0.5
+        reserve_collateral_eff = reserve_collateral * 0.5
+
+    st.write("Simulating peg paths...")
+    peg_df = simulate_mean_reverting_peg(
+        n_paths=n_paths_peg,
+        n_steps=n_steps_peg,
+        T=T_peg,
+        kappa=kappa,
+        sigma=sigma_eff,
+        p0=p0_peg,
+        mu_level=1.0,
+        random_seed=42,
+    )
+
+    # --- Plot some sample paths ---
+    st.subheader("Simulated Peg Paths")
+    fig_peg, ax_peg = plt.subplots()
+    # show only a subset of paths for clarity
+    sample_cols = peg_df.columns[: min(30, peg_df.shape[1])]
+    ax_peg.plot(peg_df.index, peg_df[sample_cols])
+    ax_peg.axhline(1.0, color="black", linestyle="--", label="Target peg = 1.0")
+    ax_peg.set_xlabel("Time")
+    ax_peg.set_ylabel("Price")
+    ax_peg.legend()
+    ax_peg.grid(True)
+    st.pyplot(fig_peg)
+
+    # --- Distribution at horizon ---
+    st.subheader("Distribution of Peg at Horizon")
+    final_prices = peg_df.iloc[-1, :].values
+    fig_hist_peg, ax_hist_peg = plt.subplots()
+    ax_hist_peg.hist(final_prices, bins=50)
+    ax_hist_peg.axvline(1.0, color="black", linestyle="--")
+    ax_hist_peg.set_xlabel("Price at horizon")
+    ax_hist_peg.set_ylabel("Frequency")
+    ax_hist_peg.grid(True)
+    st.pyplot(fig_hist_peg)
+
+    # basic stats
+    peg_stats = pd.Series(final_prices).describe(percentiles=[0.01, 0.05, 0.5, 0.95, 0.99])
+    st.write("Peg stats at horizon:")
+    st.write(peg_stats)
+
+    # --- Slippage curve ---
+    st.subheader("Slippage vs Trade Size (AMM Pool)")
+    slip_df = slippage_curve(
+        reserve_stable=reserve_stable_eff,
+        reserve_collateral=reserve_collateral_eff,
+        max_trade_pct=max_trade_pct,
+        n_points=40,
+        fee_bps=fee_bps,
+        direction="sell_stable",
+    )
+
+    fig_slip, ax_slip = plt.subplots()
+    ax_slip.plot(slip_df["trade_size_pct"] * 100.0, slip_df["price_impact_pct"])
+    ax_slip.set_xlabel("Trade size (% of stable reserve)")
+    ax_slip.set_ylabel("Price impact (%)")
+    ax_slip.grid(True)
+    st.pyplot(fig_slip)
+
+    # --- Simple "peg resiliency" metrics ---
+    # find trade size where impact exceeds 1% and 3%
+    def find_threshold(target_impact):
+        mask = slip_df["price_impact_pct"].abs() >= target_impact
+        if not mask.any():
+            return None
+        idx = np.argmax(mask.values)
+        return slip_df.iloc[idx]
+
+    t1 = find_threshold(1.0)
+    t3 = find_threshold(3.0)
+
+    st.subheader("Peg Resiliency Summary")
+
+    if t1 is None:
+        st.write("Peg remains within ±1% even at max trade size on this curve.")
+    else:
+        st.write(
+            f"~1% peg deviation reached at trade ≈ "
+            f"{t1['trade_size']:.0f} ({t1['trade_size_pct']*100:.2f}% of stable reserve)."
+        )
+
+    if t3 is None:
+        st.write("Peg remains within ±3% even at max trade size on this curve.")
+    else:
+        st.write(
+            f"~3% peg deviation reached at trade ≈ "
+            f"{t3['trade_size']:.0f} ({t3['trade_size_pct']*100:.2f}% of stable reserve)."
+        )
