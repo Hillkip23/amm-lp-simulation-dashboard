@@ -1,7 +1,7 @@
 <p align="center">
 
   <!-- Project Title -->
-  <h1 align="center">AMM LP Simulation Dashboard</h1>
+  <h1 align="center">AMM LP Simulation and Stablecoin Peg & Liquidity Stress Dashboard</h1>
   <h4 align="center">Quantitative AMM Risk Modeling • Uniswap v2/v3 • LP Performance Simulation</h4>
 
   <!-- Live App Badge -->
@@ -324,5 +324,176 @@ Upper bound range
 Grid resolution
 
 Returns top-performing ranges by mean LP/HODL.
+
+🪙 Stablecoin Peg & Liquidity Stress Lab
+
+This module extends the AMM simulation framework to analyze stablecoin peg behavior and liquidity resilience under shocks, volatility regimes, and varying pool depths.
+It is inspired by risk methodologies used at Gauntlet, Chaos Labs, Aave Risk DAO, and top-tier protocol research teams.
+
+🔍 What This Module Helps You Explore
+
+Peg Stability
+
+How tightly a stablecoin trades around its $1 peg under different volatility levels
+
+Impact of mean-reversion (κ) on restoring the peg after shocks
+
+Tail outcomes: probability of depegs >1%, >5%, or >10%
+
+Liquidity Stress
+
+How AMM depth affects slippage during large trades
+
+How quickly the pool becomes unstable under stress (volatility spike, liquidity drain)
+
+Maximum sustainable trade size before slippage > X%
+
+Risk Management Insights
+
+Sensitivity of peg stability to volatility (σ)
+
+Impact of capital efficiency (reserves) on peg resilience
+
+Fee income vs peg deviation under stress
+
+🧠 Model Overview
+
+The Stablecoin Lab combines:
+
+1. Peg Dynamics — Ornstein–Uhlenbeck (OU) Process
+
+A mean-reverting stochastic process:
+
+𝑑
+𝑝
+𝑡
+=
+𝜅
+(
+1
+−
+𝑝
+𝑡
+)
+ 
+𝑑
+𝑡
++
+𝜎
+ 
+𝑑
+𝑊
+𝑡
+dp
+t
+	​
+
+=κ(1−p
+t
+	​
+
+)dt+σdW
+t
+	​
+
+
+Where:
+
+κ = mean-reversion speed
+
+σ = peg volatility
+
+p₀ = initial price (usually 1.00)
+
+This is a common model for soft-pegged stablecoins and FX markets.
+
+2. Liquidity & Slippage — Constant-Product AMM (Uniswap v2)
+
+Given reserves 
+𝑅
+𝑠
+R
+s
+	​
+
+ (stablecoin) and 
+𝑅
+𝑐
+R
+c
+	​
+
+ (collateral):
+
+𝑥
+𝑦
+=
+𝑘
+xy=k
+
+Slippage is computed for trade sizes expressed as a % of pool reserves.
+You can simulate:
+
+Normal liquidity
+
+Liquidity drained pools
+
+Volatility shocks
+
+Combined stress scenarios
+
+🎛️ User Controls in the App
+Peg Dynamics
+
+Number of paths
+
+Steps per path
+
+Simulation horizon
+
+Mean reversion speed (κ)
+
+Peg volatility (σ)
+
+Initial price
+
+Pool & Trade Stress
+
+Pool reserves (stable & collateral)
+
+AMM fee (bps)
+
+Max trade size (% of reserves)
+
+Stress scenario selector
+
+Normal
+
+Volatility Spike
+
+Liquidity Drain
+
+Combined Stress
+
+📊 Outputs & Visualizations
+Peg Distribution
+
+Price paths
+
+Distribution of final peg
+
+Probability of depeg events
+
+AMM Liquidity Stress
+
+Slippage vs Trade Size
+
+Trade impact under different reserve levels
+
+Combined Peg + Liquidity Stress
+
+How peg volatility feeds into AMM slippage
+
+Stress scenarios (vol spike, liquidity drain)
 
 
