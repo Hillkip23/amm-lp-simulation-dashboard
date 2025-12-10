@@ -16,63 +16,148 @@
   <img src="https://img.shields.io/badge/Python-3.10+-yellow?logo=python" alt="Python Version" />
   <img src="https://img.shields.io/badge/Streamlit-1.x-FF4B4B
 
-
 AMM LP Simulation Dashboard
 
-A quantitative research tool for modeling AMM liquidity provider performance under stochastic price dynamics.
+A quantitative research platform for modeling AMM liquidity provider performance under stochastic price dynamics.
+
+This Streamlit dashboard analyzes LP returns, impermanent loss, dynamic fees, volatility regimes, and concentrated liquidity performance using Monte Carlo simulations and real-market calibration.
+
 Built with Python, Streamlit, NumPy, and Matplotlib.
 Streamlit: https://amm-lp-simulation-dashboard-gzdftxeqlbiqxtuzbpc3eh.streamlit.app/
 
-🚀 Overview
+Project Overview
 
-This project is a full-featured DeFi quantitative simulation framework designed to analyze the risk and return profile of Automated Market Makers (AMMs) across:
+The AMM LP Simulation Dashboard is a full-featured DeFi quantitative research tool designed to study:
 
-Uniswap v2 (constant product AMM)
+Liquidity provider outcomes across Uniswap v2 and Uniswap v3
 
-Uniswap v2 with dynamic fees (volatility-adjusted)
+LP vs HODL performance under various market regimes
 
-Uniswap v3 (concentrated liquidity)
+The impact of impermanent loss, fees, and volatility
 
-It includes:
+How concentrated liquidity ranges affect risk & return
 
-✔ GBM calibration from real historical prices (BTC, ETH, UNI, XRP, S&P500)
-✔ LP vs HODL return simulation under different AMM models
-✔ Dynamic fee modeling based on realized volatility
-✔ Autocorrelation and volatility clustering diagnostics
-✔ Rolling volatility visualization
-✔ Impermanent loss decomposition
-✔ Optimal range search for Uniswap v3 positions
-✔ Full interactive visualization with Streamlit
+How real-world crypto assets behave statistically (drift, volatility, clustering)
 
-This dashboard mirrors the kind of modeling performed by Gauntlet, Chaos Labs, and other DeFi risk teams.
+This tool mirrors analyses performed by Gauntlet, Chaos Labs, Block Analitica, and academic DeFi research groups.
 
-🧠 Key Questions This Tool Answers
-🧩 For Uniswap v2 LPs
 
-Do LPs outperform HODLing under certain market regimes?
+🧠 Core Features
+🔷 1. LP Performance Simulation (Uniswap v2)
 
-How does increased volatility impact expected LP returns?
+Thousands of GBM price paths (Monte Carlo)
 
-What is the expected long-term impermanent loss?
+Tracks:
 
-⚡ With Dynamic Fees
+LP/HODL ratio
 
-Can fee multipliers offset impermanent loss?
+Impermanent loss (IL)
 
-How much do realized volatility spikes contribute to LP yield?
+Fee income contribution
 
-🎯 For Uniswap v3 Positions
+Total LP excess return
 
-What is the optimal range for maximizing LP/HODL performance?
+Histogram, distribution statistics, and path visualizer
 
-How frequently does price exit the range?
+Stress scenario engine (bull, bear, crab markets)
 
-How does concentrated liquidity affect tail risk?
 
-Mathematical Modeling
-1. Price Dynamics (GBM)
+🔷 2. Dynamic Fee Modeling
 
-Each asset follows:
+Model the effect of volatility-linked fees:
+
+fee_APR
+(
+𝑡
+)
+=
+baseFee
++
+𝛼
+⋅
+RealizedVol
+(
+𝑡
+)
+fee_APR(t)=baseFee+α⋅RealizedVol(t)
+
+Higher volatility → higher fees → partial IL mitigation.
+
+🔷 3. Real-Market Calibration
+
+Upload or load built-in data for:
+
+BTC
+
+ETH
+
+UNI
+
+XRP
+
+S&P500
+
+The system performs:
+
+Daily log-return extraction
+
+Estimation of annualized drift (μ) and volatility (σ)
+
+Return distribution visualization
+
+Rolling volatility analysis
+
+Autocorrelation of returns
+
+Autocorrelation of squared returns (volatility clustering)
+
+These calibrated parameters can be applied directly to the Monte Carlo engine.
+
+
+🔷 4. Uniswap v3 Concentrated Liquidity Modeling
+
+Simulate v3 LP returns using user-defined ranges:
+
+Choose lower and upper price bounds
+
+Compute LP payoff at terminal price
+
+Track:
+
+Time spent in-range
+
+Out-of-range behavior
+
+Effects of volatility on range efficiency
+
+
+🔷 5. Optimal Range Search (Uniswap v3)
+
+A full grid search identifies the best price ranges for LP profitability:
+
+Evaluates mean LP/HODL for each range pair
+
+Produces top-performing 10 ranges
+
+Useful for strategy design and backtesting concentrated liquidity positions
+
+🔷 6. Single Path Visualizer
+
+Pick any simulated path and see:
+
+Price trajectory
+
+LP vs HODL over time
+
+Impermanent loss curve
+
+Helps illustrate how IL evolves throughout volatile markets.
+
+
+📚 Underlying Models
+📉 1. Geometric Brownian Motion (GBM)
+
+Price evolution:
 
 𝑑
 𝑆
@@ -107,72 +192,19 @@ t
 	​
 
 
-Simulation uses:
+Simulated with:
+S[t+1] = S[t] * exp((mu - 0.5 * sigma**2)*dt + sigma * sqrt(dt) * Z)
 
-Annualized drift (μ)
-
-Annualized volatility (σ)
-
-User-selected path count and horizon (T)
-
-Historical calibration uses daily log returns:
-
-𝜇
-=
-mean(returns)
-×
-365
-,
-𝜎
-=
-std(returns)
-×
-365
-μ=mean(returns)×365,σ=std(returns)×
-365
-	​
-
-2. Uniswap v2 (constant product)
+💧 2. Uniswap v2 AMM Model
 
 Invariant:
 
 𝑥
+⋅
 𝑦
 =
 𝑘
-xy=k
-
-LP value at time 
-𝑡
-t:
-
-𝑉
-𝐿
-𝑃
-(
-𝑡
-)
-=
-2
-𝑥
-𝑡
-𝑦
-𝑡
-V
-LP
-	​
-
-(t)=2
-x
-t
-	​
-
-y
-t
-	​
-
-	​
-
+x⋅y=k
 
 Impermanent loss:
 
@@ -181,54 +213,39 @@ Impermanent loss:
 =
 2
 𝑃
+/
+𝑃
+0
+(
 1
 +
 𝑃
+/
+𝑃
+0
+)
 −
 1
 IL=
-1+P
+(1+P/P
+0
+	​
+
+)
 2
-P
+P/P
+0
+	​
+
 	​
 
 	​
 
 −1
-3. Dynamic Fee Model (Volatility-Adjusted)
 
-Fees scale with realized volatility:
+📏 3. Uniswap v3 Range Model
 
-𝑓
-𝑡
-=
-𝑓
-0
-+
-𝛼
-⋅
-RealizedVol
-𝑡
-f
-t
-	​
-
-=f
-0
-	​
-
-+α⋅RealizedVol
-t
-	​
-
-
-Captures empirical behavior of DEXs under high-volatility periods
-
-Allows LPs to earn more during large price swings
-
-4. Uniswap v3 (Concentrated Liquidity)
-
-LP value only accrues inside chosen price range 
+LP liquidity is active only within 
 [
 𝑃
 𝐿
@@ -245,15 +262,19 @@ U
 	​
 
 ].
-Outside range, LP becomes fully one-sided.
 
-The simulation tracks:
+Outside the range:
 
-Time spent in-range vs out-of-range
+Position converts to single-sided exposure
 
-Range exit frequency
+Fee income stops
 
-LP/HODL relative value
+Range exit frequency affects expected returns
+
+
+
+
+
 
 🧰 Features
 ✔ Real Data Calibration
