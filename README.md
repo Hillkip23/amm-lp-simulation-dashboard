@@ -24,6 +24,7 @@ This Streamlit dashboard analyzes LP returns, impermanent loss, dynamic fees, vo
 
 Built with Python, Streamlit, NumPy, and Matplotlib.
 Streamlit: https://amm-lp-simulation-dashboard-gzdftxeqlbiqxtuzbpc3eh.streamlit.app/
+Streamlit: https://amm-lp-simulation-dashboard-ukfplji4nvza69ehzufyo8.streamlit.app/
 
 Project Overview
 
