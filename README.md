@@ -20,6 +20,15 @@ AMM LP Simulation Dashboard
 
 A quantitative research platform for modeling AMM liquidity provider performance under stochastic price dynamics.
 
+AMM LP Simulation and Stablecoin Stress Dashboard is a quantitative research platform for analyzing automated market maker (AMM) liquidity provider performance and stablecoin peg resilience under realistic market dynamics. It combines Monte Carlo AMM simulations, real‑market calibration, and peg‑and‑liquidity stress testing inspired by institutional DeFi risk methodologies.
+
+The dashboard models LP outcomes for Uniswap v2 and Uniswap v3 across different market regimes, comparing LP returns to a HODL benchmark while decomposing impermanent loss, fee income, and volatility effects. Users can explore concentrated liquidity behavior, optimal range selection, and single‑path visualizations to understand how strategy choices impact risk and performance over time.
+
+A dedicated stablecoin module extends the AMM engine to study peg stability and liquidity stress using mean‑reverting price dynamics and constant‑product AMM slippage modeling. It helps evaluate how volatility, mean reversion, pool depth, and trade size interact to drive depeg risk, slippage profiles, and risk‑return trade‑offs for stablecoin liquidity pools
+
+Implementation
+The app is built in Python using Streamlit for the front end, with NumPy and scientific libraries for Monte Carlo simulation, statistical calibration, and visualization. Live deployments are available via hosted Streamlit instances for interactive analysis without local setup.
+
 This Streamlit dashboard analyzes LP returns, impermanent loss, dynamic fees, volatility regimes, and concentrated liquidity performance using Monte Carlo simulations and real-market calibration.
 
 Built with Python, Streamlit, NumPy, and Matplotlib.
@@ -51,68 +60,36 @@ This tool mirrors analyses performed by Gauntlet, Chaos Labs, Block Analitica, a
 Thousands of GBM price paths (Monte Carlo)
 
 Tracks:
-
-LP/HODL ratio
-
-Impermanent loss (IL)
-
-Fee income contribution
-
-Total LP excess return
-
-Histogram, distribution statistics, and path visualizer
-
-Stress scenario engine (bull, bear, crab markets)
+- LP/HODL ratio
+- Impermanent loss (IL)
+- Fee income contribution
+- Total LP excess return
+- Histogram, distribution statistics, and path visualizer
+- Stress scenario engine (bull, bear, crab markets)
 
 
 🔷 2. Dynamic Fee Modeling
 
 Model the effect of volatility-linked fees:
-
-fee_APR
-(
-𝑡
-)
-=
-baseFee
-+
-𝛼
-⋅
-RealizedVol
-(
-𝑡
-)
-fee_APR(t)=baseFee+α⋅RealizedVol(t)
-
-Higher volatility → higher fees → partial IL mitigation.
+- fee_APR(t)=baseFee+α⋅RealizedVol(t)
+- Higher volatility → higher fees → partial IL mitigation.
 
 🔷 3. Real-Market Calibration
 
 Upload or load built-in data for:
-
-BTC
-
-ETH
-
-UNI
-
-XRP
-
-S&P500
+- BTC
+- ETH
+- UNI
+- XRP
+- S&P500
 
 The system performs:
-
-Daily log-return extraction
-
-Estimation of annualized drift (μ) and volatility (σ)
-
-Return distribution visualization
-
-Rolling volatility analysis
-
-Autocorrelation of returns
-
-Autocorrelation of squared returns (volatility clustering)
+- Daily log-return extraction
+- Estimation of annualized drift (μ) and volatility (σ)
+- Return distribution visualization
+- Rolling volatility analysis
+- Autocorrelation of returns
+- Autocorrelation of squared returns (volatility clustering)
 
 These calibrated parameters can be applied directly to the Monte Carlo engine.
 
@@ -120,179 +97,65 @@ These calibrated parameters can be applied directly to the Monte Carlo engine.
 🔷 4. Uniswap v3 Concentrated Liquidity Modeling
 
 Simulate v3 LP returns using user-defined ranges:
-
-Choose lower and upper price bounds
-
-Compute LP payoff at terminal price
+- Choose lower and upper price bounds
+- Compute LP payoff at terminal price
 
 Track:
-
-Time spent in-range
-
-Out-of-range behavior
-
-Effects of volatility on range efficiency
+- Time spent in-range
+- Out-of-range behavior
+- Effects of volatility on range efficiency
 
 
 🔷 5. Optimal Range Search (Uniswap v3)
-
 A full grid search identifies the best price ranges for LP profitability:
-
-Evaluates mean LP/HODL for each range pair
-
-Produces top-performing 10 ranges
-
-Useful for strategy design and backtesting concentrated liquidity positions
+- Evaluates mean LP/HODL for each range pair
+- Produces top-performing 10 ranges
+- Useful for strategy design and backtesting concentrated liquidity positions
 
 🔷 6. Single Path Visualizer
-
 Pick any simulated path and see:
-
-Price trajectory
-
-LP vs HODL over time
-
-Impermanent loss curve
+- Price trajectory
+- LP vs HODL over time
+- Impermanent loss curve
 
 Helps illustrate how IL evolves throughout volatile markets.
 
 
 📚 Underlying Models
-📉 1. Geometric Brownian Motion (GBM)
-
+1. Geometric Brownian Motion (GBM)
 Price evolution:
 
-𝑑
-𝑆
-𝑡
-=
-𝜇
-𝑆
-𝑡
-𝑑
-𝑡
-+
-𝜎
-𝑆
-𝑡
-𝑑
-𝑊
-𝑡
-dS
-t
-	​
-
-=μS
-t
-	​
-
-dt+σS
-t
-	​
-
-dW
-t
-	​
-
+𝑑𝑆𝑡=𝜇𝑆𝑡𝑑𝑡+𝜎𝑆𝑡𝑑𝑊𝑡dSt​=μStdt+σSt​dWt
 
 Simulated with:
 S[t+1] = S[t] * exp((mu - 0.5 * sigma**2)*dt + sigma * sqrt(dt) * Z)
 
-💧 2. Uniswap v2 AMM Model
-
+2. Uniswap v2 AMM Model
 Invariant:
-
-𝑥
-⋅
-𝑦
-=
-𝑘
-x⋅y=k
+𝑥⋅𝑦=𝑘x⋅y=k
 
 Impermanent loss:
+IL=2𝑃/𝑃0(1+𝑃/𝑃0)−1 
 
-𝐼
-𝐿
-=
-2
-𝑃
-/
-𝑃
-0
-(
-1
-+
-𝑃
-/
-𝑃
-0
-)
-−
-1
-IL=
-(1+P/P
-0
-	​
+IL=(1+P/P0)2P/P0 ​−1
 
-)
-2
-P/P
-0
-	​
-
-	​
-
-	​
-
-−1
-
-📏 3. Uniswap v3 Range Model
+3. Uniswap v3 Range Model
 
 LP liquidity is active only within 
-[
-𝑃
-𝐿
-,
-𝑃
-𝑈
-]
-[P
-L
-	​
-
-,P
-U
-	​
-
-].
-
+[𝑃𝐿,𝑃𝑈][PL,PU].
 Outside the range:
-
-Position converts to single-sided exposure
-
-Fee income stops
-
-Range exit frequency affects expected returns
-
-
-
-
-
+- Position converts to single-sided exposure
+- Fee income stops
+- Range exit frequency affects expected returns
 
 🧰 Features
 ✔ Real Data Calibration
-
-BTC, ETH, UNI, XRP, S&P500
-
-OHLC cleaned & resampled
-
-GBM drift & volatility estimation
-
-Rolling volatility (21-day window)
-
-ACF of returns and squared returns
-
-Detects volatility clustering
+- BTC, ETH, UNI, XRP, S&P500
+- OHLC cleaned & resampled
+- GBM drift & volatility estimation
+- Rolling volatility (21-day window)
+- ACF of returns and squared returns
+- Detects volatility clustering
 
 | Model                                | Supported   |
 | ------------------------------------ | ----------- |
@@ -303,30 +166,19 @@ Detects volatility clustering
 
 
 Outputs include:
-
-LP portfolio value
-
-HODL benchmark
-
-LP/HODL ratio distribution
-
-Impermanent loss
-
-Fee income
-
-Return decomposition
-
-Uniswap v3 Optimal Range Search
+- LP portfolio value
+- HODL benchmark
+- LP/HODL ratio distribution
+- Impermanent loss
+- Fee income
+- Return decomposition
+- Uniswap v3 Optimal Range Search
 
 Grid search over:
-
-Lower bound range
-
-Upper bound range
-
-Grid resolution
-
-Returns top-performing ranges by mean LP/HODL.
+- Lower bound range
+- Upper bound range
+- Grid resolution
+- Returns top-performing ranges by mean LP/HODL.
 
 🪙 Stablecoin Peg & Liquidity Stress Lab
 
@@ -335,168 +187,76 @@ It is inspired by risk methodologies used at Gauntlet, Chaos Labs, Aave Risk DAO
 
 🔍 What This Module Helps You Explore
 
-Peg Stability
-
-How tightly a stablecoin trades around its $1 peg under different volatility levels
-
-Impact of mean-reversion (κ) on restoring the peg after shocks
-
-Tail outcomes: probability of depegs >1%, >5%, or >10%
+(i).Peg Stability
+(ii).How tightly a stablecoin trades around its $1 peg under different volatility levels
+(iii). Impact of mean-reversion (κ) on restoring the peg after shocks
+(iv). Tail outcomes: probability of depegs >1%, >5%, or >10%
 
 Liquidity Stress
 
-How AMM depth affects slippage during large trades
-
-How quickly the pool becomes unstable under stress (volatility spike, liquidity drain)
-
-Maximum sustainable trade size before slippage > X%
+(i). How AMM depth affects slippage during large trades
+(ii). How quickly the pool becomes unstable under stress (volatility spike, liquidity drain)
+(iii). Maximum sustainable trade size before slippage > X%
 
 Risk Management Insights
 
-Sensitivity of peg stability to volatility (σ)
-
-Impact of capital efficiency (reserves) on peg resilience
-
-Fee income vs peg deviation under stress
+(i). Sensitivity of peg stability to volatility (σ)
+(ii). Impact of capital efficiency (reserves) on peg resilience
+(iii). Fee income vs peg deviation under stress
 
 🧠 Model Overview
-
 The Stablecoin Lab combines:
 
 1. Peg Dynamics — Ornstein–Uhlenbeck (OU) Process
 
 A mean-reverting stochastic process:
 
-𝑑
-𝑝
-𝑡
-=
-𝜅
-(
-1
-−
-𝑝
-𝑡
-)
- 
-𝑑
-𝑡
-+
-𝜎
- 
-𝑑
-𝑊
-𝑡
-dp
-t
-	​
-
-=κ(1−p
-t
-	​
-
-)dt+σdW
-t
-	​
-
-
+𝑑𝑝𝑡=𝜅(1−𝑝𝑡)𝑑𝑡+𝜎𝑑𝑊𝑡dpt=κ(1−pt)dt+σdWt	​
 Where:
-
 κ = mean-reversion speed
-
 σ = peg volatility
-
 p₀ = initial price (usually 1.00)
-
 This is a common model for soft-pegged stablecoins and FX markets.
 
 2. Liquidity & Slippage — Constant-Product AMM (Uniswap v2)
 
 Given reserves 
-𝑅
-𝑠
-R
-s
-	​
-
- (stablecoin) and 
-𝑅
-𝑐
-R
-c
-	​
-
- (collateral):
-
-𝑥
-𝑦
-=
-𝑘
-xy=k
-
+𝑅𝑠Rs​ (stablecoin) and 𝑅𝑐Rc	​(collateral):
+𝑥𝑦=𝑘.xy=k
 Slippage is computed for trade sizes expressed as a % of pool reserves.
 You can simulate:
+- Normal liquidity
+- Liquidity drained pools
+- Volatility shocks
+- Combined stress scenarios
 
-Normal liquidity
+🎛️ User Controls in the App Peg Dynamics
 
-Liquidity drained pools
+- Number of paths
+- Steps per path
+- Simulation horizon
+- Mean reversion speed (κ)
+- Peg volatility (σ)
+- Initial price
+- Pool & Trade Stress
+- Pool reserves (stable & collateral)
+- AMM fee (bps)
+- Max trade size (% of reserves)
+- Stress scenario selector
+- Normal
+- Volatility Spike
+- Liquidity Drain
+- Combined Stress
 
-Volatility shocks
-
-Combined stress scenarios
-
-🎛️ User Controls in the App
-Peg Dynamics
-
-Number of paths
-
-Steps per path
-
-Simulation horizon
-
-Mean reversion speed (κ)
-
-Peg volatility (σ)
-
-Initial price
-
-Pool & Trade Stress
-
-Pool reserves (stable & collateral)
-
-AMM fee (bps)
-
-Max trade size (% of reserves)
-
-Stress scenario selector
-
-Normal
-
-Volatility Spike
-
-Liquidity Drain
-
-Combined Stress
-
-📊 Outputs & Visualizations
-Peg Distribution
-
-Price paths
-
-Distribution of final peg
-
-Probability of depeg events
-
-AMM Liquidity Stress
-
-Slippage vs Trade Size
-
-Trade impact under different reserve levels
-
-Combined Peg + Liquidity Stress
-
-How peg volatility feeds into AMM slippage
-
-Stress scenarios (vol spike, liquidity drain)
+📊 Outputs & Visualizations Peg Distribution
+- Price paths
+- Distribution of final peg
+- Probability of depeg events
+- AMM Liquidity Stress
+- Slippage vs Trade Size
+- Trade impact under different reserve levels
+- Combined Peg + Liquidity Stress
+- How peg volatility feeds into AMM slippage
+- Stress scenarios (vol spike, liquidity drain)
 
 
